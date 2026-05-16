@@ -31,6 +31,9 @@ public class FirebaseConfig {
     @Value("${firebase.config.path}")
     private Resource firebaseConfigResource;
 
+    @Value("${firebase.config.json:}")
+    private String firebaseConfigJson;
+
     @PostConstruct
     public void initializeFirebase() {
         // Skip if Firebase is already initialized (e.g. on hot-reload)
@@ -39,30 +42,43 @@ public class FirebaseConfig {
             return;
         }
 
-        try (InputStream serviceAccount = firebaseConfigResource.getInputStream()) {
-            // Read the JSON and check it's not the placeholder
-            byte[] bytes = serviceAccount.readAllBytes();
-            String content = new String(bytes);
+        try {
+            byte[] jsonBytes = null;
 
-            if (content.contains("YOUR_PROJECT_ID")) {
-                log.warn("Firebase service account contains placeholder values. " +
-                         "Push notifications disabled. " +
-                         "Replace src/main/resources/firebase-service-account.json " +
-                         "with your real Firebase credentials.");
+            // Priority 1: Check if JSON string is provided via environment variable
+            if (firebaseConfigJson != null && !firebaseConfigJson.trim().isEmpty()) {
+                log.info("Initializing Firebase using JSON string from environment variable");
+                jsonBytes = firebaseConfigJson.getBytes();
+            } 
+            // Priority 2: Check if physical file exists and is not a placeholder
+            else if (firebaseConfigResource != null && firebaseConfigResource.exists()) {
+                try (InputStream is = firebaseConfigResource.getInputStream()) {
+                    jsonBytes = is.readAllBytes();
+                    String content = new String(jsonBytes);
+                    if (content.contains("YOUR_PROJECT_ID")) {
+                        log.warn("Firebase service account file contains placeholder values. Skipping.");
+                        jsonBytes = null;
+                    } else {
+                        log.info("Initializing Firebase using file: {}", firebaseConfigResource.getFilename());
+                    }
+                }
+            }
+
+            if (jsonBytes == null) {
+                log.warn("No valid Firebase credentials found (checked environment variable and file). " +
+                         "Push notifications disabled.");
                 return;
             }
 
             FirebaseOptions options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(
-                            new java.io.ByteArrayInputStream(bytes)))
+                    .setCredentials(GoogleCredentials.fromStream(new java.io.ByteArrayInputStream(jsonBytes)))
                     .build();
 
             FirebaseApp.initializeApp(options);
             log.info("Firebase Admin SDK initialized successfully");
 
         } catch (IOException e) {
-            log.warn("Firebase service account file not found or unreadable. " +
-                     "Push notifications disabled. Error: {}", e.getMessage());
+            log.error("Failed to initialize Firebase: {}", e.getMessage());
         }
     }
 }
