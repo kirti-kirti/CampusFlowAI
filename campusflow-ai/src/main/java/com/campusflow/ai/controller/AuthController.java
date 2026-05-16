@@ -211,6 +211,22 @@ public class AuthController {
 
     // ─── Password Recovery ────────────────────────────────────────────────────────
     
+    // ─── FCM Token Registration ────────────────────────────────────────────────
+
+    @Operation(
+        summary = "Register FCM device token",
+        description = "Saves the Firebase Cloud Messaging token for the authenticated user to enable push notifications.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @PostMapping("/fcm-token")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> registerFcmToken(
+            @RequestBody FcmTokenRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        authService.saveFcmToken(userDetails.getUsername(), request.getToken());
+        return ResponseEntity.ok().build();
+    }
+
     @Operation(summary = "Request password reset token", description = "Generates a recovery token and sends it to the user's email.")
     @PostMapping("/forgot-password")
     public ResponseEntity<com.campusflow.ai.dto.ApiResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {

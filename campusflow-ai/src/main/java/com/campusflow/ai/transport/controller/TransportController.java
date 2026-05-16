@@ -318,6 +318,21 @@ public class TransportController {
                 transportService.calculateDistance(busId, userLat, userLon));
     }
 
+    // ─── Role-aware: My Bus ───────────────────────────────────────────────────────
+
+    @Operation(
+        summary = "Get my bus location",
+        description = "**Role required: STUDENT, PARENT, TEACHER**\n\n" +
+                      "Returns the bus and live location relevant to the authenticated user. " +
+                      "Students get their class bus, parents get their child's bus, teachers get their assigned bus."
+    )
+    @GetMapping("/my-bus")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PARENT', 'TEACHER')")
+    public ResponseEntity<BusLocationResponse> getMyBus(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(transportService.getMyBus(userDetails.getUsername()));
+    }
+
     @Operation(summary = "Get count of students currently in the bus")
     @GetMapping("/count/{busId}")
     @PreAuthorize("isAuthenticated()")

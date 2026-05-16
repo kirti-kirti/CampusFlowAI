@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Calendar, Bell, Bus,
-  MessageSquare, User, LogOut, ScanLine, MessageCircle
+  MessageSquare, User, LogOut, ScanLine, MessageCircle, History
 } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
 
@@ -11,13 +11,16 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout();
-    navigate('/login');
+    if (window.confirm('Are you sure you want to log out of your session?')) {
+      logout();
+      navigate('/login');
+    }
   };
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard',     path: '/dashboard' },
     { icon: ScanLine,        label: 'Attendance',    path: '/attendance' },
+    { icon: History,         label: 'Logs',          path: '/attendance/logs' },
     { icon: Calendar,        label: 'Timetable',     path: '/timetable' },
     { icon: Bell,            label: 'Notifications', path: '/notifications' },
     { icon: Bus,             label: 'Transport',     path: '/transport' },

@@ -18,12 +18,11 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       const response = await authService.login(credentials);
-      const { token, id, name, email, role, tenantId, universityId } = response;
-      const userData = { id, name, email, role, tenantId, universityId };
+      const { token, ...userData } = response;
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
-      return { success: true, role };
+      return { success: true, role: userData.role };
     } catch (error) {
       return { success: false, error: error.response?.data?.message || error.message };
     }
@@ -35,8 +34,14 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const updateUser = (userData) => {
+    const updated = { ...user, ...userData };
+    localStorage.setItem('user', JSON.stringify(updated));
+    setUser(updated);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   );

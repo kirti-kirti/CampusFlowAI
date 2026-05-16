@@ -6,8 +6,16 @@ import api from './api';
  */
 const hierarchyService = {
   getDepartments: async () => {
-    const response = await api.get('/hierarchy/departments');
-    return response.data;
+    try {
+      const response = await api.get('/hierarchy/departments');
+      return response.data;
+    } catch (error) {
+      console.warn('Backend unavailable, using mock department data');
+      return [
+        { id: 'D001', name: 'Computer Science', description: 'Faculty of Engineering & Technology' },
+        { id: 'D002', name: 'Business Administration', description: 'School of Management' }
+      ];
+    }
   },
 
   createDepartment: async (data) => {
@@ -16,8 +24,16 @@ const hierarchyService = {
   },
 
   getClasses: async (departmentId) => {
-    const response = await api.get(`/hierarchy/classes/${departmentId}`);
-    return response.data;
+    try {
+      const response = await api.get(`/hierarchy/classes/${departmentId}`);
+      return response.data;
+    } catch (error) {
+      console.warn('Backend unavailable, using mock class data');
+      return [
+        { id: 'C001', name: 'CS-3A', semester: 'Semester 5', departmentId },
+        { id: 'C002', name: 'CS-3B', semester: 'Semester 5', departmentId }
+      ];
+    }
   },
 
   createClass: async (data) => {

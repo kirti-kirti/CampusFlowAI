@@ -35,6 +35,9 @@ public class BusRequest {
     @NotBlank(message = "routeName is required")
     private String routeName;
 
+    /** Optional: links to a managed Route entity */
+    private Long routeId;
+
     /** Optional: class assigned to this bus for student/parent tracking */
     private String assignedClass;
 }

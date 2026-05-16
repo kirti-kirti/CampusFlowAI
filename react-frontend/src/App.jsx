@@ -10,7 +10,21 @@ function App() {
     <AuthProvider>
       <Router>
         <AppRoutes />
-        <ToastContainer position="bottom-right" theme="colored" />
+        <ToastContainer 
+          position="top-center"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+          toastClassName="!rounded-[1.5rem] !shadow-2xl !border-none !bg-white/80 !backdrop-blur-xl !text-slate-900 !font-bold !p-4"
+          bodyClassName="!font-bold"
+          progressClassName="!bg-primary"
+        />
       </Router>
     </AuthProvider>
   );

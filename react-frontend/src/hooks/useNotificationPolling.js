@@ -1,46 +1,48 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { toast } from 'react-toastify';
-import notificationService from '../services/notificationService';
+import api from '../services/api';
+import { requestFcmToken, onForegroundMessage } from '../lib/firebase';
 
+/**
+ * Registers the device FCM token with the backend on login,
+ * then listens for foreground push messages via Firebase.
+ *
+ * No polling — notifications arrive via FCM push.
+ */
 const useNotificationPolling = (user) => {
-  const lastNotifIdRef = useRef(null);
-
   useEffect(() => {
     if (!user) return;
 
-    let intervalId;
+    let unsubscribe;
 
-    const fetchNotifications = async () => {
-      try {
-        const data = await notificationService.getNotifications();
-        if (data && data.length > 0) {
-          const sorted = [...data].sort((a, b) => b.id - a.id);
-          const maxId = sorted[0].id;
-          if (lastNotifIdRef.current === null) {
-            lastNotifIdRef.current = maxId;
-          } else if (maxId > lastNotifIdRef.current) {
-            const newNotifs = sorted.filter(n => n.id > lastNotifIdRef.current);
-            newNotifs.forEach(n => {
-              toast.info(`🔔 ${n.title}`, { position: 'top-right', autoClose: 5000, theme: 'light' });
-            });
-            lastNotifIdRef.current = maxId;
-          }
-        }
-      } catch (err) {
-        // Stop polling on auth errors — token expired or logged out
-        if (err.response?.status === 401 || err.response?.status === 403) {
-          clearInterval(intervalId);
+    const init = async () => {
+      // 1. Get FCM token and register it with the backend
+      const token = await requestFcmToken();
+      if (token) {
+        try {
+          await api.post('/auth/fcm-token', { token });
+        } catch {
+          // Non-fatal — push will still work if token was already registered
         }
       }
+
+      // 2. Listen for foreground messages (app is open)
+      unsubscribe = onForegroundMessage((payload) => {
+        const title = payload.notification?.title || payload.data?.title || 'New Notification';
+        const body  = payload.notification?.body  || payload.data?.body  || '';
+        toast.info(`🔔 ${title}${body ? ': ' + body : ''}`, {
+          position: 'top-right',
+          autoClose: 6000,
+          theme: 'light',
+        });
+      });
     };
 
-    // Initial fetch
-    fetchNotifications();
+    init();
 
-    // Poll every 5 seconds
-    intervalId = setInterval(fetchNotifications, 5000);
-
-    return () => clearInterval(intervalId);
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
   }, [user]);
 };
 

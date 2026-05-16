@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Navigation2, MapPin, Wifi, WifiOff, Maximize2 } from 'lucide-react';
+import { Navigation2, MapPin, Wifi, WifiOff, Maximize2, Route, Info } from 'lucide-react';
+import { cn } from "@/lib/utils";
 
 // ─── SVG Bus Icon for Google Maps ────────────────────────────────────────────
 const BUS_SVG = `
@@ -20,18 +21,9 @@ function animateMarker(marker, map, from, to, durationMs = 1500) {
   const deltaLat = to.lat - startLat;
   const deltaLng = to.lng - startLng;
 
-  // Calculate bearing for marker rotation
-  const bearing = window.google.maps.geometry
-    ? window.google.maps.geometry.spherical.computeHeading(
-        new window.google.maps.LatLng(from.lat, from.lng),
-        new window.google.maps.LatLng(to.lat, to.lng)
-      )
-    : 0;
-
   function step(now) {
     const elapsed = now - startTime;
     const t = Math.min(elapsed / durationMs, 1);
-    // Ease in-out cubic
     const ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     const lat = startLat + deltaLat * ease;
     const lng = startLng + deltaLng * ease;
@@ -55,15 +47,7 @@ function haversine(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-// ─── ETA calculation (assume 30 km/h avg speed) ───────────────────────────────
-function calcETA(distKm) {
-  const mins = Math.round((distKm / 30) * 60);
-  if (mins < 1) return '< 1 min';
-  if (mins < 60) return `${mins} min`;
-  return `${Math.floor(mins / 60)}h ${mins % 60}m`;
-}
-
-const BusMap = ({ busLocation, busNumber, routeName, locationHistory = [] }) => {
+const BusMap = ({ busLocation, busNumber, routeName, locationHistory = [], className }) => {
   const mapRef = useRef(null);
   const googleMapRef = useRef(null);
   const markerRef = useRef(null);
@@ -257,129 +241,102 @@ const BusMap = ({ busLocation, busNumber, routeName, locationHistory = [] }) => 
   // ── No Google Maps fallback ───────────────────────────────────────────────
   if (!mapsReady) {
     return (
-      <div className="relative w-full h-[480px] rounded-[2rem] overflow-hidden bg-slate-900 flex flex-col items-center justify-center text-center p-8">
-        {/* Animated grid */}
+      <div className={cn("relative w-full h-full min-h-[400px] overflow-hidden bg-slate-900 flex flex-col items-center justify-center text-center p-8 rounded-3xl", className)}>
         <div className="absolute inset-0 opacity-10 pointer-events-none"
           style={{ backgroundImage: 'linear-gradient(#334155 1px,transparent 1px),linear-gradient(90deg,#334155 1px,transparent 1px)', backgroundSize: '40px 40px' }} />
-        <div className="absolute top-1/4 left-1/4 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl animate-pulse" />
-
+        
         <div className="relative z-10 space-y-6">
-          <div className="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 rounded-3xl flex items-center justify-center mx-auto animate-bounce">
+          <div className="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 rounded-3xl flex items-center justify-center mx-auto animate-bounce shadow-2xl">
             <Navigation2 size={40} className="text-emerald-400" />
           </div>
           <div>
-            <h3 className="text-xl font-black text-white mb-2">Live GPS Telemetry</h3>
-            <p className="text-slate-400 text-sm max-w-xs mx-auto leading-relaxed">
-              Add your Google Maps API key to <code className="text-emerald-400 bg-white/5 px-1 rounded">.env</code> to enable the live map.
+            <h3 className="text-xl font-black text-white mb-2 uppercase tracking-tight">Geo-Spatial Telemetry</h3>
+            <p className="text-slate-400 text-xs max-w-xs mx-auto leading-relaxed font-bold">
+              Secure institutional connection active. Live map interface requires API verification.
             </p>
           </div>
 
-          {/* Coordinate display */}
           <div className="grid grid-cols-2 gap-3 w-full max-w-xs mx-auto">
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-left">
-              <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Latitude</p>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-left backdrop-blur-md">
+              <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">LATITUDE</p>
               <p className="text-white font-mono text-sm font-bold">{busLocation?.latitude?.toFixed(6) || '—'}</p>
             </div>
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-left">
-              <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Longitude</p>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-left backdrop-blur-md">
+              <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">LONGITUDE</p>
               <p className="text-white font-mono text-sm font-bold">{busLocation?.longitude?.toFixed(6) || '—'}</p>
             </div>
           </div>
-
-          {busLocation?.latitude && (
-            <a
-              href={`https://maps.google.com/?q=${busLocation.latitude},${busLocation.longitude}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white rounded-2xl font-black text-sm hover:bg-emerald-400 transition-colors"
-            >
-              <MapPin size={16} /> Open in Google Maps
-            </a>
-          )}
-        </div>
-
-        {/* Live indicator */}
-        <div className="absolute bottom-5 right-5 flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-2 rounded-full">
-          <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-          <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Telemetry Active</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="relative w-full h-[480px] rounded-[2rem] overflow-hidden shadow-2xl border-2 border-white/50">
-      {/* Google Map canvas */}
+    <div className={cn("relative w-full h-full overflow-hidden shadow-2xl", className)}>
       <div ref={mapRef} className="w-full h-full" />
 
-      {/* ── Top overlay: Bus info pill ── */}
-      <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between gap-3 pointer-events-none">
-        <div className="bg-white/95 backdrop-blur-xl px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 pointer-events-auto">
-          <div className="w-8 h-8 bg-emerald-500 rounded-xl flex items-center justify-center text-white text-sm">🚌</div>
-          <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">{routeName || 'Campus Route'}</p>
-            <p className="text-sm font-black text-slate-900 leading-tight">{busNumber || 'School Bus'}</p>
+      {/* Floating Meta-Data Overlay */}
+      <div className="absolute top-6 left-6 right-6 z-10 flex items-start justify-between gap-4 pointer-events-none">
+        <div className="bg-slate-950/90 backdrop-blur-2xl px-6 py-4 rounded-2xl shadow-2xl border border-white/10 flex items-center gap-5 pointer-events-auto max-w-sm">
+          <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white text-xl shadow-lg shadow-primary/20">🚌</div>
+          <div className="space-y-1">
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] leading-none">{routeName || 'Campus Route'}</p>
+            <p className="text-lg font-black text-white leading-none tracking-tight">{busNumber || 'Fleet Unit'}</p>
           </div>
-          <div className="flex items-center gap-1.5 ml-2 pl-3 border-l border-slate-100">
-            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-            <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Live</span>
+          <div className="flex items-center gap-2 ml-4 pl-4 border-l border-white/10">
+            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_#10b981]" />
+            <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Live</span>
           </div>
         </div>
 
         <button
           onClick={toggleFullscreen}
-          className="w-10 h-10 bg-white/95 backdrop-blur-xl rounded-xl shadow-xl flex items-center justify-center text-slate-500 hover:text-primary transition-colors pointer-events-auto"
+          className="w-14 h-14 bg-white/95 dark:bg-slate-900/90 backdrop-blur-2xl rounded-2xl shadow-2xl flex items-center justify-center text-slate-500 hover:text-primary transition-all pointer-events-auto active:scale-90 border border-white/20 dark:border-slate-800"
         >
-          <Maximize2 size={16} />
+          <Maximize2 size={20} />
         </button>
       </div>
 
-      {/* ── Bottom overlay: Stats bar ── */}
-      <div className="absolute bottom-4 left-4 right-4 z-10">
-        <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl p-4 flex items-center justify-between gap-4">
-          {/* Last update */}
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-slate-50 rounded-xl flex items-center justify-center">
-              <Wifi size={14} className="text-emerald-500" />
+      <div className="absolute bottom-6 left-6 right-6 z-10 pointer-events-none">
+        <div className="bg-white/95 dark:bg-slate-900/90 backdrop-blur-2xl rounded-2xl shadow-2xl p-6 flex flex-wrap items-center justify-between gap-8 pointer-events-auto border border-white/20 dark:border-slate-800">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center shadow-inner">
+              <Wifi size={18} className="text-emerald-500" />
             </div>
             <div>
-              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Updated</p>
-              <p className="text-xs font-black text-slate-900">{timeAgo}</p>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Latency Sync</p>
+              <p className="text-sm font-black text-slate-900 dark:text-white uppercase">{timeAgo}</p>
             </div>
           </div>
 
-          <div className="w-px h-8 bg-slate-100" />
+          <div className="hidden md:block w-px h-10 bg-slate-100 dark:bg-slate-800" />
 
-          {/* Coordinates */}
-          <div className="flex-1 text-center">
-            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Position</p>
-            <p className="text-[10px] font-mono font-bold text-slate-700">
-              {busLocation?.latitude?.toFixed(4)}, {busLocation?.longitude?.toFixed(4)}
-            </p>
+          <div className="flex-1 min-w-[120px]">
+             <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Telemetry Vector</p>
+             <p className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
+               {busLocation?.latitude?.toFixed(5)}, {busLocation?.longitude?.toFixed(5)}
+             </p>
           </div>
 
-          <div className="w-px h-8 bg-slate-100" />
+          <div className="flex items-center gap-6">
+            <div className="text-right">
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Relative Distance</p>
+              <p className="text-sm font-black text-slate-900 dark:text-white uppercase">
+                {distanceKm ? `${distanceKm} km` : 'CALCULATING...'}
+              </p>
+            </div>
 
-          {/* Distance from user */}
-          <div className="text-right">
-            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Distance</p>
-            <p className="text-xs font-black text-slate-900">
-              {distanceKm ? `${distanceKm} km` : 'Locating...'}
-            </p>
+            {busLocation?.latitude && (
+              <a
+                href={`https://maps.google.com/?q=${busLocation.latitude},${busLocation.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 active:scale-90"
+              >
+                <MapPin size={20} />
+              </a>
+            )}
           </div>
-
-          {/* Open in Maps */}
-          {busLocation?.latitude && (
-            <a
-              href={`https://maps.google.com/?q=${busLocation.latitude},${busLocation.longitude}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-white hover:bg-primary/90 transition-colors shrink-0"
-            >
-              <MapPin size={16} />
-            </a>
-          )}
         </div>
       </div>
     </div>

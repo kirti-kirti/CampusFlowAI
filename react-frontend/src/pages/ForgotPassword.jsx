@@ -45,10 +45,10 @@ const ForgotPassword = () => {
   if (submitted) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#F8FAFC] p-6 relative overflow-hidden">
-        <Card className="w-full max-w-md border-none shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] relative z-10 bg-white/95 backdrop-blur-xl rounded-[2rem] overflow-hidden text-center">
+        <Card className="w-full max-w-md border-none shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] relative z-10 bg-white/95 backdrop-blur-xl rounded-xl overflow-hidden text-center">
           <div className="h-2 bg-emerald-500" />
           <CardHeader className="pt-12 pb-6">
-            <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-sm">
+            <div className="w-20 h-20 bg-emerald-50 rounded-xl flex items-center justify-center mx-auto mb-6 shadow-sm">
               <CheckCircle2 className="text-emerald-500" size={40} />
             </div>
             <CardTitle className="text-2xl font-black text-slate-900">Recovery Sent</CardTitle>
@@ -58,7 +58,7 @@ const ForgotPassword = () => {
           </CardHeader>
           <CardContent className="pb-12 px-10">
             {demoToken && (
-              <div className="mb-6 bg-slate-50 border border-slate-200 rounded-2xl p-4">
+              <div className="mb-6 bg-slate-50 border border-slate-200 rounded-xl p-4">
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Recovery Token</p>
                 <div className="flex items-center gap-2">
                   <code className="flex-1 text-xs font-mono text-slate-700 bg-white border border-slate-100 rounded-xl px-3 py-2 truncate">{demoToken}</code>
@@ -73,7 +73,7 @@ const ForgotPassword = () => {
             )}
             <Button 
               onClick={() => navigate('/reset-password')}
-              className="w-full h-14 text-sm font-black uppercase tracking-widest bg-slate-900 hover:bg-slate-800 transition-all rounded-2xl mb-4"
+              className="w-full h-14 text-sm font-black uppercase tracking-widest bg-slate-900 hover:bg-slate-800 transition-all rounded-xl mb-4"
             >
               Reset Identity
             </Button>
@@ -96,7 +96,7 @@ const ForgotPassword = () => {
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-[120px] -ml-40 -mb-40" />
       </div>
 
-      <Card className="w-full max-w-md border-none shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] relative z-10 bg-white/95 backdrop-blur-xl rounded-[2rem] overflow-hidden">
+      <Card className="w-full max-w-md border-none shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] relative z-10 bg-white/95 backdrop-blur-xl rounded-xl overflow-hidden">
         <div className="h-2 bg-gradient-to-r from-primary to-indigo-400" />
         <CardHeader className="pt-10 pb-6 px-10">
           <Link to="/login" className="flex items-center gap-2 text-slate-400 hover:text-primary transition-colors text-xs font-bold uppercase tracking-widest mb-6">
@@ -121,7 +121,7 @@ const ForgotPassword = () => {
                 <Input 
                   type="email" 
                   placeholder="name@organization.com" 
-                  className="pl-12 h-14 bg-slate-50/50 border-slate-100 rounded-2xl text-base focus-visible:ring-primary/20 transition-all font-medium"
+                  className="pl-12 h-14 bg-slate-50/50 border-slate-100 rounded-xl text-base focus-visible:ring-primary/20 transition-all font-medium"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -131,7 +131,7 @@ const ForgotPassword = () => {
             
             <Button 
               type="submit" 
-              className="w-full h-14 text-base font-black transition-all shadow-xl shadow-primary/20 rounded-2xl group active:scale-[0.98]"
+              className="w-full h-14 text-base font-black transition-all shadow-xl shadow-primary/20 rounded-xl group active:scale-[0.98]"
               disabled={loading}
             >
               {loading ? (
@@ -153,3 +153,4 @@ const ForgotPassword = () => {
 };
 
 export default ForgotPassword;
+

@@ -15,6 +15,7 @@ import Transport from '../pages/Transport';
 import Chatbot from '../pages/Chatbot';
 import Profile from '../pages/Profile';
 import AttendanceReportPage from '../pages/attendance/AttendanceReportPage';
+import AttendanceLogsPage from '../pages/attendance/AttendanceLogsPage';
 import TeacherAttendancePage from '../pages/attendance/TeacherAttendancePage';
 import StudentAttendancePage from '../pages/attendance/StudentAttendancePage';
 import ScannerPage from '../pages/attendance/ScannerPage';
@@ -25,10 +26,12 @@ import SubjectManagement from '../pages/admin/SubjectManagement';
 import UserManagement from '../pages/admin/UserManagement';
 import UniversityManagement from '../pages/admin/UniversityManagement';
 import AdminAttendanceDashboard from '../pages/attendance/AdminAttendanceDashboard';
+import BusManagement from '../pages/admin/BusManagement';
 import ForgotPassword from '../pages/ForgotPassword';
 import ResetPassword from '../pages/ResetPassword';
 import BusTracking from '../pages/BusTracking';
 import Messaging from '../pages/Messaging';
+import RouteManagement from '../pages/admin/RouteManagement';
 
 const AppRoutes = () => {
   return (
@@ -45,6 +48,7 @@ const AppRoutes = () => {
         <Route path="attendance" element={<Attendance />} />
         <Route path="attendance/scanner" element={<ScannerPage />} />
         <Route path="attendance/report" element={<AttendanceReportPage />} />
+        <Route path="attendance/logs" element={<AttendanceLogsPage />} />
         
         {/* Admin Hierarchy Management */}
         <Route path="admin/university" element={<UniversityManagement />} />
@@ -53,6 +57,8 @@ const AppRoutes = () => {
         <Route path="admin/subjects" element={<SubjectManagement />} />
         <Route path="admin/users" element={<UserManagement />} />
         <Route path="admin/intelligence" element={<AdminAttendanceDashboard />} />
+        <Route path="admin/buses" element={<BusManagement />} />
+        <Route path="admin/routes" element={<RouteManagement />} />
 
         <Route path="timetable" element={<Timetable />} />
         <Route path="notifications" element={<Notifications />} />

@@ -53,4 +53,7 @@ public class RegisterRequest {
 
     /** Required for PARENT — comma-separated student user IDs */
     private String studentId;
+
+    /** Optional: home address for AI route optimization */
+    private String address;
 }

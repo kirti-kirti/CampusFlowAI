@@ -25,4 +25,7 @@ public class UpdateProfileRequest {
 
     @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
+
+    /** Home address for AI route optimization */
+    private String address;
 }

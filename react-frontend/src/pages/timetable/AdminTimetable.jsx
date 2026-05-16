@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import timetableService from '../../services/timetableService';
+import hierarchyService from '../../services/hierarchyService';
+import adminService from '../../services/adminService';
 import { toast } from 'react-toastify';
 import { 
   Plus, 
@@ -28,6 +30,10 @@ const AdminTimetable = () => {
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [searchClass, setSearchClass] = useState('CLASS-10A');
+  const [classes, setClasses] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+  const [allClasses, setAllClasses] = useState([]); // For the form dropdown
   const [formData, setFormData] = useState({ 
     classId: '', 
     subject: '', 
@@ -55,7 +61,43 @@ const AdminTimetable = () => {
 
   useEffect(() => {
     fetchTimetable(searchClass);
+    loadInitialData();
   }, []);
+
+  const loadInitialData = async () => {
+    try {
+      const [depts, teachersList] = await Promise.all([
+        hierarchyService.getDepartments(),
+        adminService.getTeachers()
+      ]);
+      setTeachers(teachersList);
+      
+      // Fetch all classes from all departments for the dropdown
+      const classPromises = depts.map(d => hierarchyService.getClasses(d.id));
+      const classesResults = await Promise.all(classPromises);
+      const flatClasses = classesResults.flat();
+      setAllClasses(flatClasses);
+    } catch (err) {
+      console.error('Failed to load initial data', err);
+    }
+  };
+
+  useEffect(() => {
+    if (formData.classId) {
+      fetchSubjects(formData.classId);
+    } else {
+      setSubjects([]);
+    }
+  }, [formData.classId]);
+
+  const fetchSubjects = async (classId) => {
+    try {
+      const data = await hierarchyService.getSubjects(classId);
+      setSubjects(data);
+    } catch (err) {
+      setSubjects([]);
+    }
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -63,7 +105,17 @@ const AdminTimetable = () => {
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === 'teacherId') {
+      const selectedTeacher = teachers.find(t => t.id?.toString() === value.toString());
+      setFormData(prev => ({ 
+        ...prev, 
+        teacherId: value, 
+        teacherName: selectedTeacher ? selectedTeacher.name : '' 
+      }));
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -113,7 +165,7 @@ const AdminTimetable = () => {
         </div>
         <Button 
           onClick={() => setShowForm(!showForm)} 
-          className="h-14 px-8 rounded-2xl font-black text-sm shadow-xl shadow-primary/20 active:scale-95 transition-all gap-3"
+          className="h-14 px-8 rounded-xl font-black text-sm shadow-xl shadow-primary/20 active:scale-95 transition-all gap-3"
         >
           {showForm ? <Trash2 size={20} /> : <Plus size={20} />}
           {showForm ? 'Cancel Provisioning' : 'Initialize New Entry'}
@@ -122,7 +174,7 @@ const AdminTimetable = () => {
 
       {/* Admin Provisioning Form */}
       {showForm && (
-        <Card className="mb-10 border-none shadow-[0_30px_60px_rgba(0,0,0,0.1)] bg-white rounded-[2.5rem] overflow-hidden animate-in zoom-in duration-500">
+        <Card className="mb-10 border-none shadow-[0_30px_60px_rgba(0,0,0,0.1)] bg-white rounded-xl overflow-hidden animate-in zoom-in duration-500">
           <div className="h-2 bg-primary" />
           <CardHeader className="pt-8 px-10">
             <CardTitle className="text-2xl font-black text-slate-900">Provision Curriculum Slot</CardTitle>
@@ -132,19 +184,53 @@ const AdminTimetable = () => {
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Class Identifier</Label>
-                <Input name="classId" placeholder="e.g. CLASS-10A" className="h-12 bg-slate-50 border-none rounded-xl font-bold" value={formData.classId} onChange={handleChange} required />
+                <select 
+                  name="classId" 
+                  className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-sm outline-none"
+                  value={formData.classId} 
+                  onChange={handleChange} 
+                  required
+                >
+                  <option value="">Select Class</option>
+                  {allClasses.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Module Subject</Label>
-                <Input name="subject" placeholder="e.g. Theoretical Physics" className="h-12 bg-slate-50 border-none rounded-xl font-bold" value={formData.subject} onChange={handleChange} required />
+                <select 
+                  name="subject" 
+                  className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-sm outline-none"
+                  value={formData.subject} 
+                  onChange={handleChange} 
+                  required
+                  disabled={!formData.classId}
+                >
+                  <option value="">Select Subject</option>
+                  {subjects.map(s => (
+                    <option key={s.id} value={s.name}>{s.name}</option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Faculty ID</Label>
-                <Input name="teacherId" placeholder="FAC-001" className="h-12 bg-slate-50 border-none rounded-xl font-bold" value={formData.teacherId} onChange={handleChange} required />
+                <select 
+                  name="teacherId" 
+                  className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-sm outline-none"
+                  value={formData.teacherId} 
+                  onChange={handleChange} 
+                  required
+                >
+                  <option value="">Select Faculty</option>
+                  {teachers.map(t => (
+                    <option key={t.id} value={t.id}>{t.name} ({t.id})</option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Faculty Name</Label>
-                <Input name="teacherName" placeholder="Dr. Sarah Connor" className="h-12 bg-slate-50 border-none rounded-xl font-bold" value={formData.teacherName} onChange={handleChange} required />
+                <Input name="teacherName" placeholder="Auto-filled" className="h-12 bg-slate-100 border-none rounded-xl font-bold cursor-not-allowed" value={formData.teacherName} readOnly />
               </div>
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Cycle Day</Label>
@@ -166,7 +252,7 @@ const AdminTimetable = () => {
                   <Input type="time" name="endTime" className="h-12 bg-slate-50 border-none rounded-xl font-bold" value={formData.endTime} onChange={handleChange} required />
                 </div>
               </div>
-              <Button type="submit" disabled={loading} className="md:col-span-2 h-14 rounded-2xl font-black text-base shadow-xl shadow-primary/20 active:scale-[0.98] transition-all">
+              <Button type="submit" disabled={loading} className="md:col-span-2 h-14 rounded-xl font-black text-base shadow-xl shadow-primary/20 active:scale-[0.98] transition-all">
                 {loading ? <Loader2 className="animate-spin" /> : 'Confirm Provisioning'}
               </Button>
             </form>
@@ -181,25 +267,25 @@ const AdminTimetable = () => {
           <form onSubmit={handleSearch}>
             <Input 
               placeholder="Search by Class Identifier (e.g. CLASS-10A)..." 
-              className="h-16 pl-14 pr-6 bg-white border-none shadow-sm rounded-3xl text-base focus-visible:ring-primary/10 transition-all font-medium"
+              className="h-16 pl-14 pr-6 bg-white border-none shadow-sm rounded-xl text-base focus-visible:ring-primary/10 transition-all font-medium"
               value={searchClass} 
               onChange={(e) => setSearchClass(e.target.value)} 
             />
           </form>
         </div>
-        <Button onClick={() => fetchTimetable(searchClass)} className="h-16 px-8 rounded-3xl font-black text-xs uppercase tracking-widest gap-2 bg-slate-900 text-white shadow-xl active:scale-95 transition-all">
+        <Button onClick={() => fetchTimetable(searchClass)} className="h-16 px-8 rounded-xl font-black text-xs uppercase tracking-widest gap-2 bg-slate-900 text-white shadow-xl active:scale-95 transition-all">
           Sync Records
         </Button>
       </div>
 
       {/* Curriculum Record Feed */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-20 bg-slate-50/50 rounded-[3rem]">
+        <div className="flex flex-col items-center justify-center py-20 bg-slate-50/50 rounded-xl">
           <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
           <p className="font-bold text-slate-400 tracking-tight">Syncing with encrypted storage...</p>
         </div>
       ) : schedule.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 bg-slate-50/50 rounded-[3rem] border-2 border-dashed border-slate-100">
+        <div className="flex flex-col items-center justify-center py-20 bg-slate-50/50 rounded-xl border-2 border-dashed border-slate-100">
           <ShieldCheck size={48} className="text-slate-200 mb-6" />
           <p className="font-bold text-slate-400 tracking-tight text-lg">No synchronized curriculum data found for {searchClass}.</p>
         </div>
@@ -207,9 +293,9 @@ const AdminTimetable = () => {
         <div className="grid gap-4">
           <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 ml-1 mb-2">Synchronized Entries</h3>
           {schedule.sort((a, b) => a.startTime.localeCompare(b.startTime)).map((item) => (
-            <Card key={item.id} className="border-none shadow-[0_4px_20px_rgba(0,0,0,0.02)] bg-white rounded-3xl group hover:shadow-xl transition-all">
+            <Card key={item.id} className="border-none shadow-[0_4px_20px_rgba(0,0,0,0.02)] bg-white rounded-xl group hover:shadow-xl transition-all">
               <CardContent className="p-6 flex items-center gap-6">
-                <div className="w-14 h-14 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center group-hover:bg-primary/5 group-hover:text-primary transition-colors">
+                <div className="w-14 h-14 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center group-hover:bg-primary/5 group-hover:text-primary transition-colors">
                   <Calendar size={24} />
                 </div>
                 <div className="flex-1">
@@ -246,3 +332,4 @@ const AdminTimetable = () => {
 };
 
 export default AdminTimetable;
+

@@ -50,7 +50,7 @@ const ResetPassword = () => {
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-[120px] -ml-40 -mb-40" />
       </div>
 
-      <Card className="w-full max-w-md border-none shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] relative z-10 bg-white/95 backdrop-blur-xl rounded-[2rem] overflow-hidden">
+      <Card className="w-full max-w-md border-none shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] relative z-10 bg-white/95 backdrop-blur-xl rounded-xl overflow-hidden">
         <div className="h-2 bg-gradient-to-r from-emerald-400 to-primary" />
         <CardHeader className="pt-10 pb-6 px-10">
           <CardTitle className="text-3xl font-black tracking-tight text-slate-900 mb-1">Reset Identity</CardTitle>
@@ -72,7 +72,7 @@ const ResetPassword = () => {
                 <Input 
                   type="text" 
                   placeholder="Paste your 36-character token" 
-                  className="pl-12 h-14 bg-slate-50/50 border-slate-100 rounded-2xl text-base focus-visible:ring-primary/20 transition-all font-medium"
+                  className="pl-12 h-14 bg-slate-50/50 border-slate-100 rounded-xl text-base focus-visible:ring-primary/20 transition-all font-medium"
                   value={formData.token}
                   onChange={(e) => setFormData({...formData, token: e.target.value})}
                   required
@@ -87,7 +87,7 @@ const ResetPassword = () => {
                 <Input 
                   type="password" 
                   placeholder="••••••••" 
-                  className="pl-12 h-14 bg-slate-50/50 border-slate-100 rounded-2xl text-base focus-visible:ring-primary/20 transition-all font-medium"
+                  className="pl-12 h-14 bg-slate-50/50 border-slate-100 rounded-xl text-base focus-visible:ring-primary/20 transition-all font-medium"
                   value={formData.newPassword}
                   onChange={(e) => setFormData({...formData, newPassword: e.target.value})}
                   required
@@ -102,7 +102,7 @@ const ResetPassword = () => {
                 <Input 
                   type="password" 
                   placeholder="••••••••" 
-                  className="pl-12 h-14 bg-slate-50/50 border-slate-100 rounded-2xl text-base focus-visible:ring-primary/20 transition-all font-medium"
+                  className="pl-12 h-14 bg-slate-50/50 border-slate-100 rounded-xl text-base focus-visible:ring-primary/20 transition-all font-medium"
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                   required
@@ -112,7 +112,7 @@ const ResetPassword = () => {
             
             <Button 
               type="submit" 
-              className="w-full h-14 text-base font-black transition-all shadow-xl shadow-primary/20 rounded-2xl group active:scale-[0.98] bg-slate-900 hover:bg-slate-800"
+              className="w-full h-14 text-base font-black transition-all shadow-xl shadow-primary/20 rounded-xl group active:scale-[0.98] bg-slate-900 hover:bg-slate-800"
               disabled={loading}
             >
               {loading ? (
@@ -134,3 +134,4 @@ const ResetPassword = () => {
 };
 
 export default ResetPassword;
+

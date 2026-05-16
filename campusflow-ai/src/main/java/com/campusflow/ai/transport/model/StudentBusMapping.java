@@ -55,4 +55,9 @@ public class StudentBusMapping {
     /** When the student last checked out */
     @Column
     private LocalDateTime checkedOutAt;
+
+    /** True if student marked absent for today — excluded from route optimization */
+    @Column
+    @Builder.Default
+    private Boolean absent = false;
 }

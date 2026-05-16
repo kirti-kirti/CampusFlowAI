@@ -83,4 +83,16 @@ public class User {
     /** FCM device token for push notifications */
     @Column
     private String fcmToken;
+
+    /** Home address for AI route optimization */
+    @Column
+    private String address;
+
+    /** Latitude of home address (geocoded) */
+    @Column
+    private Double addressLat;
+
+    /** Longitude of home address (geocoded) */
+    @Column
+    private Double addressLng;
 }

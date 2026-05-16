@@ -9,6 +9,12 @@ import java.util.Optional;
 
 public interface StudentBusMappingRepository extends JpaRepository<StudentBusMapping, Long> {
 
+    /** All mappings for a student (any status) */
+    List<StudentBusMapping> findByStudentId(Long studentId);
+
+    /** All mappings for a bus regardless of status */
+    List<StudentBusMapping> findByBusId(String busId);
+
     /** All students currently IN a specific bus */
     List<StudentBusMapping> findByBusIdAndStatus(String busId, BusStatus status);
 

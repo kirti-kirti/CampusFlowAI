@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
@@ -6,7 +6,10 @@ import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+
+  return {
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -17,13 +20,12 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    // Replace placeholder in index.html with actual API key at build/dev time
     {
       name: 'inject-gmaps-key',
       transformIndexHtml(html) {
         return html.replace(
           '__VITE_GMAPS__',
-          process.env.VITE_GOOGLE_MAPS_API_KEY || ''
+          env.VITE_GOOGLE_MAPS_API_KEY || ''
         );
       }
     },
@@ -99,4 +101,5 @@ export default defineConfig({
       }
     }
   }
+}
 })

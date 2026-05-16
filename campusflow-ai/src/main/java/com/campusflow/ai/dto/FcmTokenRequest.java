@@ -12,6 +12,6 @@ import lombok.Data;
 @Data
 public class FcmTokenRequest {
 
-    @NotBlank(message = "fcmToken is required")
-    private String fcmToken;
+    @NotBlank(message = "token is required")
+    private String token;
 }

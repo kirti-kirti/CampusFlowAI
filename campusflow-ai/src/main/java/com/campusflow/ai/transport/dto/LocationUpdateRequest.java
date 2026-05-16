@@ -20,7 +20,7 @@ import lombok.Data;
 @Data
 public class LocationUpdateRequest {
 
-    @NotBlank(message = "busId is required")
+    // busId is optional — backend resolves it from the authenticated driver's assignment
     private String busId;
 
     @NotNull(message = "latitude is required")

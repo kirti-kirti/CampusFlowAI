@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldAlert, Lock, Mail, Building, Loader2, ChevronLeft, Fingerprint } from 'lucide-react';
+import { ShieldAlert, Lock, Mail, Building, Loader2, ChevronLeft, Fingerprint, Sparkles } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,6 @@ const AdminLogin = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    // Backend ignores role in login body — role is stored in DB and returned in JWT
     const result = await login({ email, password });
     if (result.success) {
       if (result.role !== 'ADMIN') {
@@ -30,62 +29,63 @@ const AdminLogin = () => {
       }
       navigate('/dashboard');
     } else {
-      setError(result.error || 'Privileged access denied');
+      setError(result.error || 'Login failed. Please check your admin credentials.');
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#0F172A] p-6 relative overflow-hidden">
-      {/* High-Security Grid Background */}
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-20">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:40px_40px]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-transparent" />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 p-6 relative overflow-hidden transition-all duration-700">
+      {/* High-Security Grid & Ambient Background */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.05]" />
+        <div className="absolute top-[-20%] right-[-10%] w-[70%] h-[70%] bg-rose-500/10 rounded-full blur-[120px] animate-pulse-soft" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-[70%] h-[70%] bg-indigo-500/10 rounded-full blur-[120px] animate-pulse-soft" />
       </div>
 
       <button 
         onClick={() => navigate('/login')}
-        className="absolute top-8 left-8 flex items-center gap-2 text-slate-400 hover:text-white transition-colors group z-20"
+        className="absolute top-10 left-10 flex items-center gap-2 text-slate-500 hover:text-white transition-all group z-20 bg-white/5 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md"
       >
-        <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-        <span className="font-bold text-sm">Return to User Portal</span>
+        <ChevronLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+        <span className="font-bold text-xs uppercase tracking-widest">Back to Login</span>
       </button>
 
-      <div className="relative z-10 w-full max-w-md animate-in fade-in zoom-in duration-700">
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-20 h-20 bg-red-500/10 rounded-3xl flex items-center justify-center border border-red-500/20 shadow-[0_0_50px_rgba(239,68,68,0.1)] mb-4">
-            <ShieldAlert className="text-red-500" size={40} />
+      <div className="relative z-10 w-full max-w-md animate-in fade-in zoom-in-95 duration-1000">
+        <div className="flex flex-col items-center mb-10">
+          <div className="w-24 h-24 bg-rose-500/10 rounded-xl flex items-center justify-center border border-rose-500/20 shadow-[0_0_80px_rgba(244,63,94,0.15)] mb-6 rotate-3 hover:rotate-0 transition-transform duration-500">
+            <ShieldAlert className="text-rose-500" size={48} />
           </div>
-          <h1 className="text-3xl font-black tracking-tight text-white mb-2">Admin Console</h1>
-          <div className="flex items-center gap-2 px-3 py-1 bg-red-500/20 rounded-full border border-red-500/30">
-            <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-red-400">Privileged Access Only</span>
+          <h1 className="text-4xl font-black tracking-tight text-white mb-2">Admin Login</h1>
+          <div className="flex items-center gap-2 px-4 py-1.5 bg-rose-500/10 rounded-full border border-rose-500/20">
+            <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-400">Secure Management Portal</span>
           </div>
         </div>
 
-        <Card className="border-slate-800 shadow-2xl bg-slate-900/50 backdrop-blur-2xl rounded-[2.5rem] overflow-hidden">
-          <CardHeader className="pt-10 pb-6 px-10 border-b border-slate-800/50">
-            <CardTitle className="text-xl font-bold text-white">Identity Verification</CardTitle>
-            <CardDescription className="text-slate-400">Authorized personnel must authenticate via secure channel.</CardDescription>
+        <Card className="border-white/10 shadow-[0_40px_100px_-15px_rgba(0,0,0,0.6)] bg-slate-900/40 backdrop-blur-3xl rounded-xl overflow-hidden border">
+          <CardHeader className="pt-12 pb-8 px-10 border-b border-white/5">
+            <CardTitle className="text-2xl font-black text-white tracking-tight">Authentication</CardTitle>
+            <CardDescription className="text-slate-400 font-medium mt-1">Please enter your admin credentials to continue.</CardDescription>
           </CardHeader>
           
           <CardContent className="px-10 py-10">
             {error && (
-              <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold p-4 rounded-2xl mb-8 flex items-center gap-3">
-                <ShieldAlert size={18} />
+              <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold p-4 rounded-xl mb-8 flex items-center gap-3 animate-shake">
+                <ShieldAlert size={20} />
                 {error}
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Instance Key</Label>
+                <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Admin School ID</Label>
                 <div className="relative group">
-                  <Building className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-red-500 transition-colors" size={18} />
+                  <Building className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-rose-500 transition-colors" size={20} />
                   <Input 
                     type="text" 
-                    placeholder="ENTER TENANT ID" 
-                    className="pl-12 h-14 bg-slate-800/50 border-slate-700 text-white rounded-2xl text-base focus-visible:ring-red-500/20 transition-all font-mono"
+                    placeholder="ENTER SCHOOL ID" 
+                    className="pl-14 h-16 bg-white/5 border-transparent text-white rounded-xl text-lg focus-visible:ring-rose-500/20 transition-all font-mono tracking-widest uppercase"
                     value={tenantId}
                     onChange={(e) => setTenantId(e.target.value)}
                     required
@@ -94,13 +94,13 @@ const AdminLogin = () => {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Admin Email</Label>
+                <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Email Address</Label>
                 <div className="relative group">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-red-500 transition-colors" size={18} />
+                  <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-rose-500 transition-colors" size={20} />
                   <Input 
                     type="email" 
-                    placeholder="admin@campusflow.ai" 
-                    className="pl-12 h-14 bg-slate-800/50 border-slate-700 text-white rounded-2xl text-base focus-visible:ring-red-500/20 transition-all font-medium"
+                    placeholder="admin@school.com" 
+                    className="pl-14 h-16 bg-white/5 border-transparent text-white rounded-xl text-lg focus-visible:ring-rose-500/20 transition-all font-semibold"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -109,13 +109,13 @@ const AdminLogin = () => {
               </div>
               
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Security Token</Label>
+                <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Password</Label>
                 <div className="relative group">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-red-500 transition-colors" size={18} />
+                  <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-rose-500 transition-colors" size={20} />
                   <Input 
                     type="password" 
                     placeholder="••••••••••••" 
-                    className="pl-12 h-14 bg-slate-800/50 border-slate-700 text-white rounded-2xl text-base focus-visible:ring-red-500/20 transition-all"
+                    className="pl-14 h-16 bg-white/5 border-transparent text-white rounded-xl text-lg focus-visible:ring-rose-500/20 transition-all"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -125,14 +125,14 @@ const AdminLogin = () => {
               
               <Button 
                 type="submit" 
-                className="w-full h-14 bg-red-600 hover:bg-red-500 text-white border-none shadow-[0_0_30px_rgba(220,38,38,0.3)] rounded-2xl text-base font-black transition-all active:scale-[0.98] mt-4"
+                className="w-full h-16 bg-rose-600 hover:bg-rose-500 text-white border-none shadow-[0_20px_50px_-10px_rgba(225,29,72,0.4)] rounded-xl text-lg font-black transition-all active:scale-[0.97] mt-6"
                 disabled={loading}
               >
                 {loading ? (
-                  <Loader2 className="animate-spin h-6 w-6" />
+                  <Loader2 className="animate-spin h-7 w-7" />
                 ) : (
-                  <span className="flex items-center justify-center gap-2">
-                    <Fingerprint size={20} /> Authorize Access
+                  <span className="flex items-center justify-center gap-3">
+                    <Fingerprint size={24} /> Sign In as Admin
                   </span>
                 )}
               </Button>
@@ -141,13 +141,17 @@ const AdminLogin = () => {
         </Card>
       </div>
 
-      <div className="mt-12 flex items-center gap-6 text-slate-600 text-[10px] font-black uppercase tracking-[0.3em] relative z-10">
-        <span>Encrypted Tunnel</span>
-        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-        <span>Hardware Verified</span>
+      <div className="mt-16 flex items-center gap-8 text-slate-700 text-[10px] font-black uppercase tracking-[0.4em] relative z-10">
+        <div className="flex items-center gap-2">
+          <Sparkles size={14} className="text-slate-800" />
+          <span>Encrypted Session</span>
+        </div>
+        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/40" />
+        <span>Hardware Secured</span>
       </div>
     </div>
   );
 };
 
 export default AdminLogin;
+

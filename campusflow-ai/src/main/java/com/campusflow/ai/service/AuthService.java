@@ -126,6 +126,7 @@ public class AuthService {
                 .departmentId(request.getDepartmentId())
                 .classRoomId(request.getClassRoomId())
                 .studentId(request.getStudentId())
+                .address(request.getAddress())
                 .build();
 
         User saved = userRepository.save(user);
@@ -161,9 +162,10 @@ public class AuthService {
     @Transactional
     public UpdateProfileResponse updateProfile(String email, UpdateProfileRequest request) {
         if ((request.getName() == null || request.getName().isBlank()) &&
-            (request.getPassword() == null || request.getPassword().isBlank())) {
+            (request.getPassword() == null || request.getPassword().isBlank()) &&
+            (request.getAddress() == null || request.getAddress().isBlank())) {
             throw new IllegalArgumentException(
-                    "Provide at least one field to update: name or password");
+                    "Provide at least one field to update: name, password, or address");
         }
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -174,6 +176,12 @@ public class AuthService {
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
+        if (request.getAddress() != null && !request.getAddress().isBlank()) {
+            user.setAddress(request.getAddress().trim());
+            // Reset geocoded coords so they get re-geocoded on next optimization
+            user.setAddressLat(null);
+            user.setAddressLng(null);
+        }
         User saved = userRepository.save(user);
 
         return UpdateProfileResponse.builder()
@@ -181,6 +189,14 @@ public class AuthService {
                 .email(saved.getEmail()).role(saved.getRole())
                 .message("Profile updated successfully").build();
     }
+    @Transactional
+    public void saveFcmToken(String email, String token) {
+        userRepository.findByEmail(email).ifPresent(user -> {
+            user.setFcmToken(token);
+            userRepository.save(user);
+        });
+    }
+
     @Transactional
     public String forgotPassword(String email) {
         User user = userRepository.findByEmail(email)

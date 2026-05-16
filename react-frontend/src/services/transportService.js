@@ -1,8 +1,24 @@
 import api from './api';
 
 export const transportService = {
+  addBus: async (data) => {
+    const response = await api.post('/transport/add', data);
+    return response.data;
+  },
+  updateBus: async (busId, data) => {
+    const response = await api.put(`/transport/update/${busId}`, data);
+    return response.data;
+  },
+  deleteBus: async (busId) => {
+    const response = await api.delete(`/transport/delete/${busId}`);
+    return response.data;
+  },
   getAllBuses: async () => {
     const response = await api.get('/transport/all');
+    return response.data;
+  },
+  getMyBus: async () => {
+    const response = await api.get('/transport/my-bus');
     return response.data;
   },
   getBusDetails: async (busId) => {

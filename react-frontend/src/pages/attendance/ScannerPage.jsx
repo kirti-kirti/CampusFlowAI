@@ -97,7 +97,7 @@ const ScannerPage = () => {
         {/* Header Display */}
         <div className="flex items-center justify-between mb-8 px-4">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-primary/20 rounded-2xl flex items-center justify-center border border-primary/20 shadow-lg shadow-primary/20">
+            <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center border border-primary/20 shadow-lg shadow-primary/20">
               <Scan className="text-primary" size={24} />
             </div>
             <div>
@@ -115,7 +115,7 @@ const ScannerPage = () => {
         </div>
 
         {/* Scanner Viewport */}
-        <div className="relative aspect-video rounded-[3rem] overflow-hidden border-4 border-white/5 shadow-2xl bg-black">
+        <div className="relative aspect-video rounded-xl overflow-hidden border-4 border-white/5 shadow-2xl bg-black">
           <Scanner
             onScan={handleScan}
             onError={(err) => console.error(err)}
@@ -132,7 +132,7 @@ const ScannerPage = () => {
           {/* Overlays */}
           <div className="absolute inset-0 pointer-events-none z-10 flex flex-col items-center justify-center">
             {/* Target Frame */}
-            <div className={`w-64 h-64 border-2 rounded-[2rem] transition-all duration-500 flex flex-col items-center justify-center ${
+            <div className={`w-64 h-64 border-2 rounded-xl transition-all duration-500 flex flex-col items-center justify-center ${
               status === 'SUCCESS' ? 'border-emerald-500 bg-emerald-500/10 scale-110' : 
               status === 'ERROR' ? 'border-rose-500 bg-rose-500/10 scale-90' : 
               'border-white/30'
@@ -150,7 +150,7 @@ const ScannerPage = () => {
 
           {/* Feedback Toast Overlay */}
           {(status === 'SUCCESS' || status === 'ERROR') && (
-            <div className={`absolute bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-2xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500 ${
+            <div className={`absolute bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500 ${
               status === 'SUCCESS' ? 'bg-emerald-500 text-white shadow-xl shadow-emerald-500/20' : 'bg-rose-500 text-white shadow-xl shadow-rose-500/20'
             }`}>
               {status === 'SUCCESS' ? <UserCheck size={20} /> : <AlertCircle size={20} />}
@@ -160,7 +160,7 @@ const ScannerPage = () => {
         </div>
 
         {/* Real-time Ticker */}
-        <div className="mt-8 bg-white/5 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-6 flex items-center justify-between px-8">
+        <div className="mt-8 bg-white/5 backdrop-blur-xl border border-white/5 rounded-xl p-6 flex items-center justify-between px-8">
            <div className="flex items-center gap-4">
              <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center">
                 <Clock className="text-slate-400" size={18} />
@@ -182,3 +182,4 @@ const ScannerPage = () => {
 };
 
 export default ScannerPage;
+

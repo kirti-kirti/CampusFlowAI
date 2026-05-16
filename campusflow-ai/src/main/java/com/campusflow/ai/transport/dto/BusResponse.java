@@ -31,6 +31,8 @@ public class BusResponse {
     private String driverName;
     private String driverId;
     private String routeName;
+    private Long routeId;
+    private java.util.List<String> stops;
     private String assignedClass;
     private Integer capacity;
     private Long studentCount;

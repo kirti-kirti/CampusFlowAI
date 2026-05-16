@@ -45,6 +45,10 @@ public class Bus {
     @Column(nullable = false)
     private String routeName;
 
+    /** FK to Route.id — optional, links to a managed route */
+    @Column
+    private Long routeId;
+
     /**
      * The class/student group assigned to this bus.
      * Used to resolve which bus a student or parent should track.
